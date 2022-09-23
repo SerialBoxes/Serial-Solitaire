@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardManager : MonoBehaviour
 {
     public enum Suit{Spades,Hearts,Clubs,Diamonds};
     public enum Rank{Ace,Two,Three,Four,Five,Six,Seven,Eight,Nine,Ten,Jack,Queen};
+    public enum Sound{Pickup,Place,Click};
 
     public static CardManager singleton;
 
@@ -26,6 +28,14 @@ public class CardManager : MonoBehaviour
     public float sepTime;
 
     public string[] abbr = new string[] {"A","2","3","4","5","6","7","8","9","10","J","Q","Q"};
+    public Sprite[] faceTextures;
+
+    public AudioClip audioPlace;
+    public AudioClip audioPick;
+    public AudioClip audioClick;
+    public AudioClip audioWin;
+
+    AudioSource audiosrc;
 
     void Start()
     {
@@ -33,6 +43,8 @@ public class CardManager : MonoBehaviour
             Debug.LogError("MULTIPLE MANAGERS");
         }
         singleton = this;
+
+        audiosrc = GetComponent<AudioSource>();
 
         InitializeCards();
         ShuffleCards();
@@ -42,7 +54,7 @@ public class CardManager : MonoBehaviour
     void InitializeCards(){
         cards = new Card[52];
         for (int i = 0; i < cards.Length;i++){
-            cards[i] = Instantiate(cardPrefab,new Vector3(-540f,234.5f,0f),Quaternion.identity).GetComponent<Card>();//horizonal layout hasn't worked its thing yet oi
+            cards[i] = Instantiate(cardPrefab,new Vector3(-470f,206f,0f),Quaternion.identity).GetComponent<Card>();//horizonal layout hasn't worked its thing yet oi
             cards[i].transform.SetParent(cardParent,false);
             cards[i].Setup(i);
         }
@@ -140,20 +152,34 @@ public class CardManager : MonoBehaviour
                 }
             }
             winBanner.gameObject.SetActive(true);
+            audiosrc.PlayOneShot(audioWin);
         }
     }
 
     public void Restart(){
+        PlaySound(Sound.Click);
         ResetEverything();
         ShuffleCards();
         DealCards();
     }
 
+    public void PlaySound(Sound s){
+        if (s == Sound.Pickup){
+            audiosrc.PlayOneShot(audioPick);
+        }else if(s == Sound.Place){
+            audiosrc.PlayOneShot(audioPlace);
+        }else if (s == Sound.Click){
+            audiosrc.PlayOneShot(audioClick);
+        }
+    }
+
     public void ShowInstructions(){
         instructions.gameObject.SetActive(true);
+        PlaySound(Sound.Click);
     }
 
     public void HideInstructions(){
         instructions.gameObject.SetActive(false);
+        PlaySound(Sound.Click);
     }
 }

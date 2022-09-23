@@ -15,6 +15,7 @@ public class Card : MonoBehaviour
     Sprite faceImage;
     Sprite backImage;
     Image imageComp;
+    Image imageCompChild;
 
     public CardHolder holder;
 
@@ -28,10 +29,8 @@ public class Card : MonoBehaviour
 
         holder = GetComponent<CardHolder>();
         imageComp = GetComponent<Image>();
-        transform.GetChild(0).GetComponent<TMP_Text>().SetText(CardManager.singleton.abbr[(int)rank]);
-        if ((int)suit % 2 == 1){
-            //transform.GetChild(0).GetComponent<TMP_Text>().color = Color.red;
-        }
+        imageCompChild = transform.GetChild(0).GetComponent<Image>();
+        imageCompChild.sprite = CardManager.singleton.faceTextures[(int)rank];
         setFace(false);
     }
 
@@ -43,8 +42,10 @@ public class Card : MonoBehaviour
         faceUp = f;
         if (faceUp){
             imageComp.color = Color.white;
+            imageCompChild.gameObject.SetActive(true);
         }else{
             imageComp.color = Color.black;
+            imageCompChild.gameObject.SetActive(false);
         }
     }
 

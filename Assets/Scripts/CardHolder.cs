@@ -14,8 +14,8 @@ public class CardHolder : MonoBehaviour
     public Card cardComp;
     int cardIndex = 0;//only for stack
 
-    Vector3 cardOffset = Vector3.down * 30;
-    Vector3 slotOffset = Vector3.up * 225f/2f;
+    Vector3 cardOffset = Vector3.down * 35;
+    Vector3 slotOffset = Vector3.up * 0f;
     Vector3 stackOffset = Vector3.left*40;
     Vector3 stackSideOffset = Vector3.right * 20;
 
@@ -26,7 +26,7 @@ public class CardHolder : MonoBehaviour
         }else if (holdType == HoldType.Slot){
             cards = new CardHolder[1];
         }else{
-            cards = new CardHolder[4];
+            cards = new CardHolder[5];
             cardIndex = -1;
         }
     }
@@ -40,6 +40,7 @@ public class CardHolder : MonoBehaviour
 
     public void Picked(){
         transform.SetParent(CardManager.singleton.cardParentHeld);
+        CardManager.singleton.PlaySound(CardManager.Sound.Pickup);
     }
 
     public void ChildPicked(){
@@ -77,9 +78,9 @@ public class CardHolder : MonoBehaviour
         return false || holdParent.StackContains(h);
     }
 
-    public void Place(CardHolder h){
+    public void Place(CardHolder h, bool sou = true){
         if (holdType == HoldType.Card && StackContains(CardManager.singleton.stack)){
-            CardManager.singleton.stack.Place(h);
+            CardManager.singleton.stack.Place(h,sou);
             return;
         }
 
@@ -95,7 +96,7 @@ public class CardHolder : MonoBehaviour
             StackSetCastTargets();
         }else{
             if (cards[0] != null){
-                cards[0].Place(h);
+                cards[0].Place(h,sou);
             }else{
                 cards[0] = h;
                 cards[0].transform.SetParent(transform,false);
@@ -107,13 +108,16 @@ public class CardHolder : MonoBehaviour
                 }
             }
         }
+        if (sou){
+            CardManager.singleton.PlaySound(CardManager.Sound.Place);
+        }
         CardManager.singleton.VibeCheck(h);
     }
 
     public IEnumerator PlaceAnim(CardHolder h, float delay)
     {
         Vector3 start = h.transform.position;
-        Place(h);
+        Place(h,false);
         Vector3 end = h.transform.position;
         h.transform.SetParent(CardManager.singleton.cardParent);
 
@@ -127,6 +131,7 @@ public class CardHolder : MonoBehaviour
             if (time > 0f && !flipped){
                 flipped = true;
                 h.cardComp.setFace(true);
+                CardManager.singleton.PlaySound(CardManager.Sound.Pickup);
             }
             time += Time.deltaTime;
             h.transform.position = Vector3.Lerp(start,end,man.animCurve.Evaluate(time/man.flightTime));
@@ -143,6 +148,7 @@ public class CardHolder : MonoBehaviour
         }else{
             h.transform.localPosition = stackOffset + stackSideOffset*cardIndex;
         }
+        CardManager.singleton.PlaySound(CardManager.Sound.Place);
     }
 
     public bool CanPlace(CardHolder h){
